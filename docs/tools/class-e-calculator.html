@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="经典理想单管 E 类逆变器参数计算：频率、母线电压、负载输出功率、品质因数、RFC 电流纹波可调；导出 LTspice 网表。">
+<title>Class-E 设计计算器 · 6.78 MHz</title>
+<style>
+:root{color-scheme:dark;--bg:#0a1020;--panel:#111b30;--panel2:#18263c;--border:#2c405b;--muted:#a5b7c9;--text:#f0f7fc;--aqua:#48e0c8;--orange:#ffb371;--blue:#83b9ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% -20%,#173450 0,#0a1020 52%);font:15px/1.65 system-ui,-apple-system,"Segoe UI","Microsoft Yahei",sans-serif;color:var(--text)}
+.wrapper{max-width:1240px;margin:0 auto;padding:28px 20px 64px}header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:25px}h1{font-size:clamp(30px,4.3vw,53px);line-height:1.14;letter-spacing:-.03em;margin:10px 0 12px}.eyebrow{letter-spacing:.18em;text-transform:uppercase;color:var(--aqua);font-size:12px;font-weight:700}.lede{color:var(--muted);max-width:820px;margin:0}.tag{border:1px solid #346377;color:var(--aqua);border-radius:28px;padding:8px 14px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:338px 1fr;gap:18px}.panel{background:rgba(17,27,48,.88);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 16px 36px #0002}.panel h2{font-size:17px;margin:0 0 16px}.fields{display:grid;gap:14px}.field{display:grid;gap:6px}.field span{color:#d6e7f4;font-size:13px}.field small{color:var(--muted);font-size:12px}input,select{width:100%;padding:11px 13px;color:#fff;background:#0b1526;border:1px solid #34506c;border-radius:9px;font-size:16px;outline:0;font-variant-numeric:tabular-nums}input:focus,select:focus{border-color:var(--aqua);box-shadow:0 0 0 3px #3ce1c322}label>strong{color:var(--orange)}.sub{font-size:12px;color:var(--muted);margin-top:6px}.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.metric{padding:17px;background:linear-gradient(145deg,#152943,#111e32);border:1px solid #31516b;border-radius:14px;min-height:113px}.metric .lbl{font-size:12px;color:#b1c6d7}.metric b{display:block;font-size:clamp(23px,2.8vw,34px);line-height:1.25;color:var(--aqua);font-variant-numeric:tabular-nums;letter-spacing:-.03em;margin-top:9px}.metric .unit{font-size:12px;color:#c6d7e5}.metric .note{font-size:11px;color:#88a4bb;margin-top:2px}.secondary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}.secondary div{background:#0c1728;border-radius:9px;padding:10px 13px}.secondary label{display:block;font-size:12px;color:#9aafc3}.secondary strong{display:block;font-size:17px;font-weight:650;font-variant-numeric:tabular-nums}.status{background:#142737;color:#a5e8de;padding:12px 15px;border-left:3px solid var(--aqua);border-radius:9px;margin-top:16px;font-size:13px}.status.bad{background:#36221f;color:#ffc6ad;border-color:#ff936d}.schematic{margin-top:18px}.schematic svg{display:block;width:100%;border-radius:10px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0 0}.btn{border:0;background:var(--aqua);color:#071a22;border-radius:9px;padding:11px 16px;font-weight:750;cursor:pointer;font-size:14px}.btn.secondary-btn{background:#1e3752;color:#d8eafa;border:1px solid #3c6583}.btn:hover{filter:brightness(1.1)}.textblock{margin-top:18px}.textblock h3{margin:0 0 10px;font-size:15px}.textblock p,.textblock li{color:#c5d5e1;font-size:13px}.textblock ul{padding-left:21px}.formula{background:#0c1728;border:1px solid #29435a;padding:14px;border-radius:10px;font-family:Consolas,monospace;overflow-x:auto;color:#9ed9ff;font-size:13px}.bottom{color:#8fa5b8;font-size:12px;margin-top:28px}.bottom a{color:var(--blue)}
+@media(max-width:920px){.layout{grid-template-columns:1fr}.result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}header{display:block}.tag{display:inline-block;margin-top:14px}}@media(max-width:520px){.result-grid,.secondary{grid-template-columns:repeat(2,minmax(0,1fr))}.metric b{font-size:25px}.wrapper{padding:20px 13px 45px}.panel{padding:15px}.secondary strong{font-size:15px}}
+</style>
+</head>
+<body>
+<main class="wrapper">
+<header><div><div class="eyebrow">RF POWER · ENGINEERING NOTE / INTERACTIVE</div><h1>经典 E 类逆变器<br>参数设计计算器</h1><p class="lede">单管 NMOS · 理想大 RFC · 50% 驱动占空比。由供电、频率、目标负载功率反推 R、C<sub>sh</sub>、L<sub>s</sub>、C<sub>s</sub> 与近似馈电电感；同时生成 LTspice 初始网表。</p></div><div class="tag">50% DUTY · CLASS-E</div></header>
+<div class="layout"><section class="panel"><h2>01 / 输入设计条件</h2><div class="fields">
+<label class="field"><span>开关频率 <strong>f</strong> (MHz)</span><input id="freq" type="number" min="0.01" step="0.01" value="6.78"></label>
+<label class="field"><span>母线电压 <strong>VDD</strong> (V)</span><input id="vdd" type="number" min="0.01" step="0.1" value="2.9"></label>
+<label class="field"><span>目标负载输出功率 <strong>Pout</strong> (W)</span><input id="pout" type="number" min="0.01" step="0.5" value="10"><small>是理想负载 R 消耗的有功功率，不是实际整机输入功率。</small></label>
+<label class="field"><span>品质因数定义</span><select id="qmode"><option value="qc">Qc = 1/(ωCsR)（沿用原计算器）</option><option value="qs">Qs = ωLs/R（常见负载 Q 定义）</option></select></label>
+<label class="field"><span>对应品质因数数值 <strong>Q</strong></span><input id="q" type="number" min="1.16" step="0.5" value="10"><small>两种定义相差 1.1525，切换时可自动换算以保持电路不变。</small></label>
+<label class="field"><span>允许馈电电流峰峰纹波 <strong>ΔIpp/I0</strong> (%)</span><input id="ripple" type="number" min="0.1" max="100" step="1" value="10"><small>近似估算 L<sub>RFC</sub> 的参数；不是严格的 E 类最优解。</small></label>
+<label class="field"><span>预估 MOSFET Coss 等效值 (pF)</span><input id="coss" type="number" min="0" step="10" value="0"><small>从总 Csh 中扣除，仅作为粗估；真实 Coss 随 Vds 变化。</small></label>
+</div><div class="actions"><button class="btn secondary-btn" id="reset" type="button">恢复示例</button></div></section>
+<section><div class="panel"><h2>02 / 核心器件计算结果</h2><div class="result-grid">
+<div class="metric"><div class="lbl">最佳等效负载 R</div><b id="outR">—</b><div class="unit">Ω</div></div>
+<div class="metric"><div class="lbl">漏源总并联电容 Csh</div><b id="outCsh">—</b><div class="unit">nF（包含 Coss）</div></div>
+<div class="metric"><div class="lbl">实际串联电感 Ls</div><b id="outLs">—</b><div class="unit">nH</div></div>
+<div class="metric"><div class="lbl">实际串联电容 Cs</div><b id="outCs">—</b><div class="unit">nF</div></div>
+<div class="metric"><div class="lbl">馈电电感估算 LRFC</div><b id="outLf">—</b><div class="unit">µH · 按纹波近似</div></div>
+<div class="metric"><div class="lbl">需要外加并联电容</div><b id="outCext">—</b><div class="unit">nF · Csh − Coss</div></div>
+</div><div class="secondary">
+<div><label>ω（角频率）</label><strong id="omega">—</strong></div><div><label>理想母线电流 I0</label><strong id="iin">—</strong></div><div><label>负载电流 Irms</label><strong id="irms">—</strong></div>
+<div><label>净感性电抗 X</label><strong id="xload">—</strong></div><div><label>串联网络自身谐振 f0</label><strong id="fres">—</strong></div><div><label>理想 Vds 峰值</label><strong id="vpeak">—</strong></div>
+<div><label>Q<sub>C</sub> = XCs/R</label><strong id="qc">—</strong></div><div><label>Q<sub>s</sub> = XLs/R</label><strong id="qs">—</strong></div><div><label>占空比</label><strong>50%</strong></div>
+</div><div id="status" class="status" aria-live="polite">已按理想 E 类公式计算。元件值仅为仿真起点。</div>
+<div class="actions"><button class="btn" id="export">导出 LTspice .cir 网表</button><button class="btn secondary-btn" id="copy">复制计算结果</button></div>
+</div>
+<div class="panel schematic"><h2>03 / 经典电路拓扑</h2>
+<svg style="max-width:100%;height:auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 480" role="img" aria-label="经典单端E类逆变器电路：VDD、RFC、NMOS、并联Csh、串联Ls Cs和负载R">
+<defs><style>
+.w{stroke:#233c59;stroke-width:4;stroke-linejoin:round;stroke-linecap:round;fill:none}.comp{stroke:#1669c7;stroke-width:4;fill:none;stroke-linecap:round}.node{fill:#233c59}.txt{font:22px system-ui,'Noto Sans SC',sans-serif;fill:#20354d}.small{font:17px system-ui,'Noto Sans SC',sans-serif;fill:#4d647c}.soft{fill:#e9f3ff;stroke:#b7d7fb;stroke-width:2}.ground{stroke:#233c59;stroke-width:3}
+</style></defs>
+<rect width="1100" height="480" rx="25" fill="#fbfdff"/>
+<rect x="22" y="20" width="1056" height="438" rx="17" fill="#fff" stroke="#d7e5f2" stroke-width="2"/>
+<!-- supply -->
+<path class="w" d="M95 105 V179 M95 269 V376 H995"/>
+<circle class="comp" cx="95" cy="224" r="45"/>
+<path class="comp" d="M95 203 V219 M87 211 H103 M87 238 H103"/>
+<text class="txt" x="30" y="151">VDD</text>
+<text class="small" x="30" y="304">DC 电源</text>
+<!-- choke -->
+<path class="w" d="M95 105 H210 M370 105 H445"/>
+<path class="comp" d="M210 105 C210 69 250 69 250 105 C250 69 290 69 290 105 C290 69 330 69 330 105 C330 69 370 69 370 105"/>
+<text class="txt" x="266" y="57">L<tspan baseline-shift="sub" font-size="15">RFC</tspan></text>
+<text class="small" x="240" y="147">馈电电感</text>
+<!-- node and output -->
+<path class="w" d="M445 105 H591 M591 105 H660"/>
+<circle class="node" cx="445" cy="105" r="6"/><circle class="node" cx="591" cy="105" r="6"/>
+<text class="txt" x="423" y="70">D</text>
+<!-- MOSFET main current channel, conventional graphical representation -->
+<path class="w" d="M445 105 V233 M445 318 V376"/>
+<path class="comp" d="M445 238 V312 M428 241 V309 M428 275 H404 M445 243 H468 M445 308 H468"/>
+<path class="w" d="M358 274 H404"/>
+<path class="comp" d="M467 243 V238 M467 308 V316"/>
+<text class="txt" x="480" y="286">Q1</text>
+<text class="small" x="470" y="311">NMOS</text>
+<text class="txt" x="326" y="256">PWM</text>
+<text class="small" x="337" y="297">G</text>
+<circle class="node" cx="445" cy="376" r="5"/>
+<!-- shunt C -->
+<path class="w" d="M591 105 V229 M591 268 V376"/>
+<path class="comp" d="M562 229 H620 M562 268 H620"/>
+<text class="txt" x="618" y="255">C<tspan baseline-shift="sub" font-size="15">sh</tspan></text>
+<text class="small" x="613" y="286">含 Coss</text>
+<circle class="node" cx="591" cy="376" r="5"/>
+<!-- Ls -->
+<path class="comp" d="M660 105 C660 69 694 69 694 105 C694 69 728 69 728 105 C728 69 762 69 762 105"/>
+<text class="txt" x="700" y="57">L<tspan baseline-shift="sub" font-size="15">s</tspan></text>
+<!-- Cs -->
+<path class="w" d="M762 105 H811 M849 105 H930"/>
+<path class="comp" d="M811 77 V133 M849 77 V133"/>
+<text class="txt" x="803" y="58">C<tspan baseline-shift="sub" font-size="15">s</tspan></text>
+<!-- R -->
+<path class="w" d="M930 105 H995 V173 M995 295 V376"/>
+<path class="comp" d="M995 173 V187 L978 199 L1012 217 L978 235 L1012 253 L978 271 L995 283 V295"/>
+<text class="txt" x="1031" y="235">R</text>
+<text class="small" x="932" y="326">等效负载</text>
+<circle class="node" cx="995" cy="376" r="5"/>
+<path class="ground" d="M545 376 V394 M520 394 H570 M527 401 H563 M535 408 H555"/>
+<rect class="soft" x="750" y="411" width="290" height="30" rx="12"/>
+<text class="small" x="768" y="432">理想 RFC / 50% 占空比</text>
+</svg>
+
+<p class="sub">电源经 RFC 向漏极馈电；Q1 周期性接地；Csh 是漏极对地总电容；输出 Ls、Cs、R 串联。这里的 R 是等效射频有功负载，不代表真实线圈直流电阻。</p></div></section></div>
+<div class="panel textblock"><h3>04 / 使用前请先分清“串联谐振”与“E 类最佳负载条件”</h3>
+<div class="formula">ω = 2πf<br>R = 0.5768 · VDD² / Pout<br>Csh,total = 0.1836 / (ω R)<br>ωLs − 1/(ωCs) = 1.1525 R<br>Qc = 1/(ωCsR) ; Qs = ωLs/R = Qc + 1.1525<br>Ls = (Qc + 1.1525)R/ω ; Cs = 1/(ωQcR)<br>I0 ≈ Pout/VDD [仅理想 η=100%]<br>LRFC ≳ VDD/(2 f I0 r) [粗略纹波估算；r = ΔIpp/I0]</div>
+<p>输出网络在开关频率 f 下需要一定的<strong>正感性电抗</strong>，因此 Ls 和 Cs 的自然串联谐振频率 f0 一般<strong>低于</strong>开关频率。若直接令 f0=f，网络净电抗为 0，就不满足这组理想经典参数。RFC 纹波公式只把半周电感受压粗略视为 VDD，真实开关节点电压不是方波，有限馈电电感必须重新仿真验证，不能保证给定百分比。</p>
+<p>设计假设：单端 50% 占空比、负载支路近似单频正弦、理想 MOSFET、无元件损耗且 RFC 足够大。真实器件还涉及 Coss(Vds)、开关时间、Qg、线圈 Q、ESR、PCB 寄生与有载阻抗变化。理想 Vds,max≈3.562VDD 是标称匹配点的估算，<strong>实际失配/瞬态可能明显更高</strong>，要按仿真和实测选 MOSFET 耐压。</p>
+<p>导出的 LTspice .cir 使用无内建 Coss 的理想开关，因此网表中的 Cshunt 填入总 Csh；将来替换成真实 MOSFET 模型后，必须按器件 Coss 重调外加电容，以免重复计入。该网表用于观察稳态 V(d)、I(Lseries)、P(Rload)。实际做硬件前，务必替换 MOSFET、Coss、ESR、线圈和有限 RFC 模型，验证开通前 Vds≈0 且斜率≈0，检查开关尖峰和电容损耗。</p></div>
+<footer class="bottom">版本 1.0 · 经典理想 Class-E 计算与初始 LTspice 网表 · 非器件保证值 / 非自动调谐算法。依据经典 RF choke Class-E 设计关系整理。</footer>
+</main>
+<script>
+(()=>{
+ const el=id=>document.getElementById(id), inputs=['freq','vdd','pout','q','qmode','ripple','coss'];let last=null;
+ const fmt=(x,n=3)=>Number.isFinite(x)?x.toLocaleString('en-US',{maximumFractionDigits:n,minimumFractionDigits:0}):'—';
+ const show=(id,v,d=3)=>el(id).textContent=fmt(v,d);
+ function recompute(){
+  const f=Number(el('freq').value)*1e6, v=Number(el('vdd').value), p=Number(el('pout').value),q=Number(el('q').value),r=Number(el('ripple').value)/100,coss=Number(el('coss').value)*1e-12,mode=el('qmode').value;
+  const qc=mode==='qc'?q:q-1.1525,qs=qc+1.1525;
+  if(![f,v,p,q,r,coss].every(Number.isFinite)||f<=0||v<=0||p<=0||r<=0||qc<=0||coss<0){el('status').className='status bad';el('status').textContent='输入有误：频率、电压、功率、纹波、Qc 必须为正；Coss ≥ 0。若选 Qs，请保证 Qs > 1.1525。';last=null;return}
+  const w=2*Math.PI*f,R=.5768*v*v/p,Csh=.1836/(w*R),Ls=qs*R/w,Cs=1/(w*qc*R),I=p/v,Lf=v/(2*f*I*r),Cext=Csh-coss,Icoil=Math.sqrt(p/R),f0=1/(2*Math.PI*Math.sqrt(Ls*Cs)),Vpeak=3.562*v,X=1.1525*R;
+  last={f,v,p,qc,qs,r,coss,w,R,Csh,Ls,Cs,I,Lf,Cext,Icoil,f0,Vpeak,X};
+  show('outR',R,5);show('outCsh',Csh*1e9,4);show('outLs',Ls*1e9,4);show('outCs',Cs*1e9,4);show('outLf',Lf*1e6,4);show('outCext',Cext*1e9,4);
+  el('omega').textContent=fmt(w/1e6,3)+' Mrad/s';el('iin').textContent=fmt(I,4)+' A';el('irms').textContent=fmt(Icoil,4)+' A';el('xload').textContent=fmt(X,4)+' Ω';el('fres').textContent=fmt(f0/1e6,4)+' MHz';el('vpeak').textContent=fmt(Vpeak,3)+' V';show('qc',qc,4);show('qs',qs,4);
+  el('status').className='status'+(Cext<0?' bad':'');el('status').textContent=Cext<0?'预估 Coss 已超过理论 Csh 总量，外加电容无法为负；应重新选择工况/器件并通过非线性模型仿真。':'参数已更新：f0 < f，是为了保留所需的 1.1525R 感性电抗。RFC 为纹波近似估算，必须再仿真核对。';
+ }
+ function exportNetlist(){if(!last)return;const s=last;const n=v=>Number(v).toExponential(10);const lines=[
+ '* Classic Class-E, idealized RF-choke, 50 percent duty; generated calculator',
+ '* Initial transient model only; confirm waveforms before hardware design',
+ `.param VDD=${n(s.v)} FREQ=${n(s.f)} POUT=${n(s.p)}`,
+ `.param RLOAD=${n(s.R)} CSH=${n(s.Csh)} LS=${n(s.Ls)} CS=${n(s.Cs)} LF=${n(s.Lf)}`,
+ '.param T={1/FREQ}',
+ 'Vbus bus 0 {VDD}',
+ 'Lfeed bus d {LF}',
+ 'Cshunt d 0 {CSH}',
+ 'Lseries d n1 {LS}',
+ 'Cseries n1 n2 {CS}',
+ 'Rload n2 0 {RLOAD}',
+ 'Vgate g 0 PULSE(0 5 0 1n 1n {T/2} {T})',
+ 'Sswitch d 0 g 0 MOS_IDEAL',
+ '.model MOS_IDEAL SW(Ron=0.005 Roff=1e9 Vt=2.5 Vh=0.1)',
+ '.tran 0 50u 42u 0.35n',
+ '.save V(d) V(g) V(n1) V(n2) I(Lfeed) I(Lseries)',
+ '.meas tran VDS_MAX MAX V(d) FROM=42u TO=50u',
+ '.meas tran IIN_AVG AVG I(Lfeed) FROM=42u TO=50u',
+ '.meas tran ILOAD_RMS RMS I(Lseries) FROM=42u TO=50u',
+ '* Optional sweeps: uncomment ONE step and rerun (LTspice comments use *)',
+ '* .step param FREQ 6.0Meg 7.5Meg 0.05Meg',
+ '.end'];
+  const blob=new Blob([lines.join('\n')+'\n'],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ClassE_ideal_'+fmt(s.f/1e6,2).replace('.','p')+'MHz.cir';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }
+ function copyText(){if(!last)return;const s=last;let t=`经典Class-E\nf=${fmt(s.f/1e6,4)} MHz, VDD=${s.v} V, Pout=${s.p} W, Qc=${fmt(s.qc,4)}, Qs=${fmt(s.qs,4)}\nR=${fmt(s.R,6)} Ω, Csh_total=${fmt(s.Csh*1e9,5)} nF, Ls=${fmt(s.Ls*1e9,5)} nH, Cs=${fmt(s.Cs*1e9,5)} nF, LRFC≈${fmt(s.Lf*1e6,5)} µH\nI0≈${fmt(s.I,4)} A, f0=${fmt(s.f0/1e6,4)} MHz, Vds_peak_ideal≈${fmt(s.Vpeak,4)} V\n注意：理想大RFC公式，真实电路须仿真。`;
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>{el('copy').textContent='已复制';setTimeout(()=>el('copy').textContent='复制计算结果',2000)}).catch(()=>fallback())}else fallback();
+  function fallback(){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();el('copy').textContent='已复制';setTimeout(()=>el('copy').textContent='复制计算结果',2000)}
+ }
+ let oldMode=el('qmode').value;el('qmode').addEventListener('change',()=>{let q=Number(el('q').value);if(Number.isFinite(q)){el('q').value=String(oldMode==='qc'?q+1.1525:q-1.1525)}oldMode=el('qmode').value;recompute()});
+ inputs.filter(x=>x!=='qmode').forEach(id=>el(id).addEventListener('input',recompute));el('reset').onclick=()=>{Object.entries({freq:6.78,vdd:2.9,pout:10,q:10,ripple:10,coss:0,qmode:'qc'}).forEach(([k,v])=>el(k).value=v);oldMode='qc';recompute()};el('export').onclick=exportNetlist;el('copy').onclick=copyText;recompute();
+})();
+</script>
+</body></html>
