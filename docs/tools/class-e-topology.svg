@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 480" role="img" aria-label="经典单端E类逆变器电路：VDD、RFC、NMOS、并联Csh、串联Ls Cs和负载R">
+<defs><style>
+.w{stroke:#233c59;stroke-width:4;stroke-linejoin:round;stroke-linecap:round;fill:none}.comp{stroke:#1669c7;stroke-width:4;fill:none;stroke-linecap:round}.node{fill:#233c59}.txt{font:22px system-ui,'Noto Sans SC',sans-serif;fill:#20354d}.small{font:17px system-ui,'Noto Sans SC',sans-serif;fill:#4d647c}.soft{fill:#e9f3ff;stroke:#b7d7fb;stroke-width:2}.ground{stroke:#233c59;stroke-width:3}
+</style></defs>
+<rect width="1100" height="480" rx="25" fill="#fbfdff"/>
+<rect x="22" y="20" width="1056" height="438" rx="17" fill="#fff" stroke="#d7e5f2" stroke-width="2"/>
+<!-- supply -->
+<path class="w" d="M95 105 V179 M95 269 V376 H995"/>
+<circle class="comp" cx="95" cy="224" r="45"/>
+<path class="comp" d="M95 203 V219 M87 211 H103 M87 238 H103"/>
+<text class="txt" x="30" y="151">VDD</text>
+<text class="small" x="30" y="304">DC 电源</text>
+<!-- choke -->
+<path class="w" d="M95 105 H210 M370 105 H445"/>
+<path class="comp" d="M210 105 C210 69 250 69 250 105 C250 69 290 69 290 105 C290 69 330 69 330 105 C330 69 370 69 370 105"/>
+<text class="txt" x="266" y="57">L<tspan baseline-shift="sub" font-size="15">RFC</tspan></text>
+<text class="small" x="240" y="147">馈电电感</text>
+<!-- node and output -->
+<path class="w" d="M445 105 H591 M591 105 H660"/>
+<circle class="node" cx="445" cy="105" r="6"/><circle class="node" cx="591" cy="105" r="6"/>
+<text class="txt" x="423" y="70">D</text>
+<!-- MOSFET main current channel, conventional graphical representation -->
+<path class="w" d="M445 105 V233 M445 318 V376"/>
+<path class="comp" d="M445 238 V312 M428 241 V309 M428 275 H404 M445 243 H468 M445 308 H468"/>
+<path class="w" d="M358 274 H404"/>
+<path class="comp" d="M467 243 V238 M467 308 V316"/>
+<text class="txt" x="480" y="286">Q1</text>
+<text class="small" x="470" y="311">NMOS</text>
+<text class="txt" x="326" y="256">PWM</text>
+<text class="small" x="337" y="297">G</text>
+<circle class="node" cx="445" cy="376" r="5"/>
+<!-- shunt C -->
+<path class="w" d="M591 105 V229 M591 268 V376"/>
+<path class="comp" d="M562 229 H620 M562 268 H620"/>
+<text class="txt" x="618" y="255">C<tspan baseline-shift="sub" font-size="15">sh</tspan></text>
+<text class="small" x="613" y="286">含 Coss</text>
+<circle class="node" cx="591" cy="376" r="5"/>
+<!-- Ls -->
+<path class="comp" d="M660 105 C660 69 694 69 694 105 C694 69 728 69 728 105 C728 69 762 69 762 105"/>
+<text class="txt" x="700" y="57">L<tspan baseline-shift="sub" font-size="15">s</tspan></text>
+<!-- Cs -->
+<path class="w" d="M762 105 H811 M849 105 H930"/>
+<path class="comp" d="M811 77 V133 M849 77 V133"/>
+<text class="txt" x="803" y="58">C<tspan baseline-shift="sub" font-size="15">s</tspan></text>
+<!-- R -->
+<path class="w" d="M930 105 H995 V173 M995 295 V376"/>
+<path class="comp" d="M995 173 V187 L978 199 L1012 217 L978 235 L1012 253 L978 271 L995 283 V295"/>
+<text class="txt" x="1031" y="235">R</text>
+<text class="small" x="932" y="326">等效负载</text>
+<circle class="node" cx="995" cy="376" r="5"/>
+<path class="ground" d="M545 376 V394 M520 394 H570 M527 401 H563 M535 408 H555"/>
+<rect class="soft" x="750" y="411" width="290" height="30" rx="12"/>
+<text class="small" x="768" y="432">理想 RFC / 50% 占空比</text>
+</svg>
