@@ -1,0 +1,22 @@
+* Classic Class-E idealized 6.78MHz (example from blog)
+* VDD=2.9V, Pout=10W, Qc=10, input ripple target=10% APPROX
+* Ideal MOS switch; Csh includes total capacitance (model no Coss)
+.param VDD=2.9 FREQ=6780000
+.param RLOAD=0.4850888 CSH=8.88468156943e-09 LS=1.26994208953e-07 CS=4.83915118161e-09 LF=6.20206489676e-07
+.param T={1/FREQ}
+Vbus bus 0 {VDD}
+Lfeed bus d {LF}
+Cshunt d 0 {CSH}
+Lseries d n1 {LS}
+Cseries n1 n2 {CS}
+Rload n2 0 {RLOAD}
+Vgate g 0 PULSE(0 5 0 1n 1n {T/2} {T})
+Sswitch d 0 g 0 MOS_IDEAL
+.model MOS_IDEAL SW(Ron=0.005 Roff=1e9 Vt=2.5 Vh=0.1)
+.tran 0 50u 42u 0.35n
+.save V(d) V(g) V(n1) V(n2) I(Lfeed) I(Lseries)
+.meas tran VDS_MAX MAX V(d) FROM=42u TO=50u
+.meas tran IIN_AVG AVG I(Lfeed) FROM=42u TO=50u
+.meas tran ILOAD_RMS RMS I(Lseries) FROM=42u TO=50u
+* .step param FREQ 6.0Meg 7.5Meg 0.05Meg
+.end
